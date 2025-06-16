@@ -10,8 +10,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { EditUserDialog } from "@/components/edit-user-dialog";
-import { DeleteUserAlert } from "@/components/delete-user-alert";
+import { EditUserDialog } from "./edit-user-dialog";
+import { DeleteUserAlert } from "./delete-user-alert";
 import { type Database } from "@/lib/database.types";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -51,11 +51,12 @@ export function UserTableActions({ profile, dplList, currentUserId }: UserTableA
             Edit
           </DropdownMenuItem>
           <DropdownMenuItem
-            className="text-destructive"
+            className="text-destructive focus:bg-destructive/10 focus:text-destructive"
             onSelect={(e) => e.preventDefault()}
             disabled={isSelf}
           >
-            <DeleteUserAlert userId={profile.id} isDisabled={isSelf} />
+            {/* FIX: Menghapus prop 'isDisabled' yang tidak lagi digunakan */}
+            <DeleteUserAlert userId={profile.id} />
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
