@@ -19,6 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { type SupabaseClient } from '@supabase/supabase-js'
 import { type Database } from '@/lib/database.types'
+import { AddUserDialog } from "@/components/add-user-dialog";
 
 // Fungsi ini sekarang menggunakan tipe data yang benar untuk Supabase client
 async function getUserRole(supabase: SupabaseClient<Database>) {
@@ -35,7 +36,8 @@ async function getUserRole(supabase: SupabaseClient<Database>) {
 }
 
 export default async function UserManagementPage() {
-  const supabase = createClient(); // Client standar untuk cek role user saat ini
+  // FIX: Menambahkan 'await' karena createClient() adalah fungsi async
+  const supabase = await createClient(); 
   
   const role = await getUserRole(supabase);
 
@@ -53,10 +55,8 @@ export default async function UserManagementPage() {
     );
   }
   
-  // Gunakan admin client untuk operasi yang memerlukan hak akses lebih
   const supabaseAdmin = createAdminClient(); 
 
-  // Fetch semua user dari auth untuk mendapatkan email
   const { data: { users }, error: usersError } = await supabaseAdmin.auth.admin.listUsers();
   
   if (usersError) {
@@ -64,7 +64,6 @@ export default async function UserManagementPage() {
       return <div>Terjadi kesalahan saat mengambil data pengguna.</div>;
   }
   
-  // Buat map untuk mencocokkan id dengan email
   const userEmailMap = new Map(users.map(user => [user.id, user.email ?? 'No email']));
 
   // Ambil semua data profil untuk ditampilkan
@@ -75,11 +74,15 @@ export default async function UserManagementPage() {
     return <div>Terjadi kesalahan saat mengambil data profil.</div>;
   }
 
+  // Ambil daftar DPL untuk dropdown
+  const { data: dplList } = await supabase.from('profiles').select('id, full_name').eq('role', 'DPL');
+
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Manajemen User</h1>
-        <Button>Tambah User</Button>
+        <AddUserDialog dplList={dplList || []} />
       </div>
       <Card>
         <CardHeader>
