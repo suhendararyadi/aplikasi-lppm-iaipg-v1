@@ -1,5 +1,5 @@
-import { createClient } from "@/lib/supabase/server"; // User-scope client
-import { createAdminClient } from "@/lib/supabase/admin"; // Admin-scope client
+import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import {
   Table,
   TableBody,
@@ -16,12 +16,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { type SupabaseClient } from '@supabase/supabase-js'
 import { type Database } from '@/lib/database.types'
 import { AddUserDialog } from "@/components/add-user-dialog";
+import { UserTableActions } from "@/components/user-table-actions";
 
-// Fungsi ini sekarang menggunakan tipe data yang benar untuk Supabase client
 async function getUserRole(supabase: SupabaseClient<Database>) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
@@ -36,12 +35,11 @@ async function getUserRole(supabase: SupabaseClient<Database>) {
 }
 
 export default async function UserManagementPage() {
-  // FIX: Menambahkan 'await' karena createClient() adalah fungsi async
-  const supabase = await createClient(); 
-  
+  const supabase = await createClient();
+  const { data: { user: currentUser } } = await supabase.auth.getUser();
+
   const role = await getUserRole(supabase);
 
-  // Amankan halaman, hanya LPPM yang boleh akses
   if (role !== 'LPPM') {
     return (
       <Card>
@@ -66,7 +64,6 @@ export default async function UserManagementPage() {
   
   const userEmailMap = new Map(users.map(user => [user.id, user.email ?? 'No email']));
 
-  // Ambil semua data profil untuk ditampilkan
   const { data: profiles, error: profilesError } = await supabase.from("profiles").select("*");
 
   if (profilesError) {
@@ -74,9 +71,7 @@ export default async function UserManagementPage() {
     return <div>Terjadi kesalahan saat mengambil data profil.</div>;
   }
 
-  // Ambil daftar DPL untuk dropdown
   const { data: dplList } = await supabase.from('profiles').select('id, full_name').eq('role', 'DPL');
-
 
   return (
     <div className="flex flex-col gap-4">
@@ -118,9 +113,11 @@ export default async function UserManagementPage() {
                   </TableCell>
                   <TableCell>{profile.identity_number || "-"}</TableCell>
                   <TableCell className="text-right">
-                    <Button variant="outline" size="sm">
-                      Edit
-                    </Button>
+                    <UserTableActions 
+                      profile={profile} 
+                      dplList={dplList || []} 
+                      currentUserId={currentUser?.id} 
+                    />
                   </TableCell>
                 </TableRow>
               ))}
