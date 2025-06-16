@@ -21,12 +21,7 @@ export default async function DashboardLayout({
     redirect("/auth/login");
   }
 
-  // Ambil nama dari profil
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('full_name')
-    .eq('id', user.id)
-    .single();
+  // Variabel 'profile' yang tidak terpakai telah dihapus dari sini
 
   return (
     <div className="flex min-h-screen w-full bg-muted/40">

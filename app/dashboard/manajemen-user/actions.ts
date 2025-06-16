@@ -4,6 +4,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+// Definisikan tipe untuk state yang dikembalikan oleh action
+type ActionState = {
+  message: string;
+  errors?: Record<string, string[] | undefined>;
+};
+
 const UserSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8, "Password minimal 8 karakter"),
@@ -18,7 +24,7 @@ const UpdateUserSchema = UserSchema.omit({ email: true, password: true }).extend
     new_password: z.string().min(8, "Password baru minimal 8 karakter").optional().or(z.literal('')),
 });
 
-export async function createUser(prevState: any, formData: FormData) {
+export async function createUser(prevState: ActionState, formData: FormData): Promise<ActionState> {
   const validatedFields = UserSchema.safeParse(
     Object.fromEntries(formData.entries())
   );
@@ -65,7 +71,7 @@ export async function createUser(prevState: any, formData: FormData) {
   return { message: "Pengguna berhasil dibuat." };
 }
 
-export async function updateUser(prevState: any, formData: FormData) {
+export async function updateUser(prevState: ActionState, formData: FormData): Promise<ActionState> {
     const validatedFields = UpdateUserSchema.safeParse(
       Object.fromEntries(formData.entries())
     );
@@ -80,7 +86,6 @@ export async function updateUser(prevState: any, formData: FormData) {
     const { userId, new_password, role, ...profileData } = validatedFields.data;
     const supabaseAdmin = createAdminClient();
 
-    // Update profil di tabel 'profiles'
     const { error: profileError } = await supabaseAdmin
         .from('profiles')
         .update({
@@ -95,7 +100,6 @@ export async function updateUser(prevState: any, formData: FormData) {
         return { message: `Gagal memperbarui profil: ${profileError.message}` };
     }
 
-    // Jika ada password baru, update password user
     if (new_password) {
         const { error: passwordError } = await supabaseAdmin.auth.admin.updateUserById(
             userId, { password: new_password }

@@ -1,4 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -6,133 +16,115 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { FileText, Users, BookOpenCheck, DollarSign } from "lucide-react";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import { type SupabaseClient } from '@supabase/supabase-js'
+import { type Database } from '@/lib/database.types'
+import { AddUserDialog } from "@/components/add-user-dialog";
+import { UserTableActions } from "@/components/user-table-actions";
 
-export default async function DashboardPage() {
+async function getUserRole(supabase: SupabaseClient<Database>) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  return profile?.role;
+}
+
+export default async function UserManagementPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user: currentUser } } = await supabase.auth.getUser();
 
-  // Placeholder data - Anda bisa menggantinya dengan data dinamis dari Supabase
-  const stats = [
-    {
-      title: "Total Penelitian",
-      value: "35",
-      icon: <FileText className="h-4 w-4 text-muted-foreground" />,
-      description: "+10 dari bulan lalu",
-    },
-    {
-      title: "Total Pengabdian",
-      value: "20",
-      icon: <Users className="h-4 w-4 text-muted-foreground" />,
-      description: "+5 dari bulan lalu",
-    },
-    {
-      title: "Total Publikasi",
-      value: "15",
-      icon: <BookOpenCheck className="h-4 w-4 text-muted-foreground" />,
-      description: "+3 dari bulan lalu",
-    },
-    {
-      title: "Dana Terserap",
-      value: "Rp 150 Jt",
-      icon: <DollarSign className="h-4 w-4 text-muted-foreground" />,
-      description: "Tahun Anggaran 2024",
-    },
-  ];
+  const role = await getUserRole(supabase);
+
+  if (role !== 'LPPM') {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Akses Ditolak</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>Anda tidak memiliki izin untuk mengakses halaman ini.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+  
+  const supabaseAdmin = createAdminClient(); 
+
+  const { data: { users }, error: usersError } = await supabaseAdmin.auth.admin.listUsers();
+  
+  if (usersError) {
+      console.error("Error fetching users:", usersError);
+      return <div>Terjadi kesalahan saat mengambil data pengguna.</div>;
+  }
+  
+  const userEmailMap = new Map(users.map(user => [user.id, user.email ?? 'No email']));
+
+  const { data: profiles, error: profilesError } = await supabase.from("profiles").select("*");
+
+  if (profilesError) {
+    console.error("Error fetching profiles:", profilesError);
+    return <div>Terjadi kesalahan saat mengambil data profil.</div>;
+  }
+
+  const { data: dplList } = await supabase.from('profiles').select('id, full_name').eq('role', 'DPL');
 
   return (
-    <>
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-        <div className="flex items-center space-x-2">
-          {/* Placeholder untuk Date Picker */}
-          <Button>Download</Button>
-        </div>
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-semibold">Manajemen User</h1>
+        <AddUserDialog dplList={dplList || []} />
       </div>
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="analytics" disabled>
-            Analytics
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="overview" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {stats.map((stat, index) => (
-              <Card key={index}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    {stat.title}
-                  </CardTitle>
-                  {stat.icon}
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stat.value}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {stat.description}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            <Card className="col-span-4">
-              <CardHeader>
-                <CardTitle>Grafik Aktivitas</CardTitle>
-              </CardHeader>
-              <CardContent className="pl-2">
-                <div className="h-[350px] w-full bg-muted/50 rounded-md flex items-center justify-center">
-                  <p className="text-muted-foreground">
-                    Placeholder untuk Grafik
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="col-span-4 md:col-span-3">
-              <CardHeader>
-                <CardTitle>Aktivitas Terbaru</CardTitle>
-                <CardDescription>
-                  Ada 5 laporan baru yang perlu diverifikasi.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {/* Placeholder untuk daftar aktivitas */}
-                <div className="space-y-8">
-                  <div className="flex items-center">
-                    <Avatar className="h-9 w-9">
-                      <AvatarImage src="/avatars/01.png" alt="Avatar" />
-                      <AvatarFallback>OM</AvatarFallback>
-                    </Avatar>
-                    <div className="ml-4 space-y-1">
-                      <p className="text-sm font-medium leading-none">
-                        Olivia Martin
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        olivia.martin@email.com
-                      </p>
-                    </div>
-                    <div className="ml-auto font-medium">+Rp 1.999.000</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
-    </>
+      <Card>
+        <CardHeader>
+          <CardTitle>Daftar Pengguna</CardTitle>
+          <CardDescription>
+            Kelola semua pengguna yang terdaftar di sistem.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nama Lengkap</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>NIP/NIM</TableHead>
+                <TableHead className="text-right">Aksi</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {profiles.map((profile) => (
+                <TableRow key={profile.id}>
+                  <TableCell className="font-medium">
+                    {profile.full_name || "Belum diisi"}
+                  </TableCell>
+                  <TableCell>
+                    {userEmailMap.get(profile.id) || 'Email tidak ditemukan'}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={profile.role === 'LPPM' ? 'default' : 'secondary'}>
+                      {profile.role}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{profile.identity_number || "-"}</TableCell>
+                  <TableCell className="text-right">
+                    <UserTableActions 
+                      profile={profile} 
+                      dplList={dplList || []} 
+                      currentUserId={currentUser?.id} 
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

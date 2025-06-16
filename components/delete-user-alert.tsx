@@ -12,14 +12,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 
-export function DeleteUserAlert({ userId, isDisabled }: { userId: string, isDisabled: boolean }) {
+export function DeleteUserAlert({ userId }: { userId: string }) {
   
   const deleteUserWithId = async () => {
       const result = await deleteUser(userId);
       if(result?.message && !result.message.includes("berhasil")){
-          alert(result.message); // Gunakan UI yang lebih baik di produksi
+          alert(result.message); // Ganti dengan UI yang lebih baik di produksi
       }
   }
 
@@ -38,7 +37,7 @@ export function DeleteUserAlert({ userId, isDisabled }: { userId: string, isDisa
         <AlertDialogFooter>
           <AlertDialogCancel>Batal</AlertDialogCancel>
           <form action={deleteUserWithId}>
-              <AlertDialogAction type="submit">Hapus</AlertDialogAction>
+              <AlertDialogAction type="submit" className="bg-destructive hover:bg-destructive/90">Hapus</AlertDialogAction>
           </form>
         </AlertDialogFooter>
       </AlertDialogContent>
