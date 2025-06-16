@@ -3,31 +3,54 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-//import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  Home,
-  BarChart3,
-  Users,
-  Settings,
-  FileText,
-  Megaphone,
-  LogOut,
-  BookOpenCheck,
-  Presentation,
-  UserCog, // Tambahkan ikon baru
-} from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
+import { 
+  Home, 
+  Settings, 
+  LogOut, 
+  FilePlus2, 
+  History,
+  UserCog,
+  FileCheck2,
+  BarChart3
+} from "lucide-react";
 
-interface DashboardSidebarProps {
-  userEmail?: string | null;
+// Definisikan tipe untuk item navigasi
+interface NavItem {
+  href: string;
+  label: string;
+  icon: React.ElementType;
 }
 
-export default function DashboardSidebar({ userEmail }: DashboardSidebarProps) {
+// Konfigurasi menu berdasarkan peran pengguna
+const navConfig: Record<string, NavItem[]> = {
+  LPPM: [
+    { href: "/dashboard", label: "Overview", icon: Home },
+    { href: "/dashboard/laporan-penelitian", label: "Laporan Penelitian", icon: BarChart3 },
+    { href: "/dashboard/manajemen-user", label: "Manajemen User", icon: UserCog },
+    { href: "/dashboard/pengaturan", label: "Pengaturan", icon: Settings },
+  ],
+  DPL: [
+    { href: "/dashboard", label: "Overview", icon: Home },
+    { href: "/dashboard/verifikasi-laporan", label: "Verifikasi Laporan", icon: FileCheck2 },
+    { href: "/dashboard/pengaturan", label: "Pengaturan", icon: Settings },
+  ],
+  MAHASISWA: [
+    { href: "/dashboard", label: "Overview", icon: Home },
+    { href: "/dashboard/laporan/buat-baru", label: "Buat Laporan Baru", icon: FilePlus2 },
+    { href: "/dashboard/laporan/riwayat", label: "Riwayat Laporan", icon: History },
+    { href: "/dashboard/pengaturan", label: "Pengaturan", icon: Settings },
+  ],
+};
+
+
+export default function DashboardSidebar({ userEmail }: { userEmail?: string | null }) {
   const pathname = usePathname();
   const router = useRouter();
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchUserRole = async () => {
@@ -43,6 +66,7 @@ export default function DashboardSidebar({ userEmail }: DashboardSidebarProps) {
           setUserRole(profile.role);
         }
       }
+      setIsLoading(false);
     };
     fetchUserRole();
   }, []);
@@ -51,25 +75,10 @@ export default function DashboardSidebar({ userEmail }: DashboardSidebarProps) {
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/auth/login");
-    router.refresh(); // Penting untuk memastikan layout melakukan re-evaluasi
+    router.refresh(); 
   };
-
-  const navItems = [
-    { href: "/dashboard", label: "Overview", icon: Home },
-    { href: "/dashboard/penelitian", label: "Penelitian", icon: FileText },
-    {
-      href: "/dashboard/pengabdian",
-      label: "Pengabdian Masyarakat",
-      icon: Users,
-    },
-    { href: "/dashboard/publikasi", label: "Publikasi Ilmiah", icon: BookOpenCheck },
-    { href: "/dashboard/seminar", label: "Seminar & Workshop", icon: Presentation },
-    { href: "/dashboard/laporan", label: "Laporan & Statistik", icon: BarChart3 },
-    { href: "/dashboard/pengumuman", label: "Pengumuman", icon: Megaphone },
-    // Tambahkan item menu baru di sini
-    { href: "/dashboard/manajemen-user", label: "Manajemen User", icon: UserCog, adminOnly: true },
-    { href: "/dashboard/pengaturan", label: "Pengaturan Akun", icon: Settings },
-  ];
+  
+  const navItems = userRole ? navConfig[userRole] || [] : [];
 
   return (
     <aside className="hidden md:flex md:flex-col md:w-64 border-r bg-background print:hidden">
@@ -84,12 +93,14 @@ export default function DashboardSidebar({ userEmail }: DashboardSidebarProps) {
         )}
       </div>
       <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
-        {navItems.map((item) => {
-          // Hanya tampilkan menu admin jika role adalah LPPM
-          if (item.adminOnly && userRole !== 'LPPM') {
-            return null;
-          }
-          return (
+        {isLoading ? (
+          <div className="p-4 space-y-2">
+            <div className="h-8 bg-muted rounded-md animate-pulse"></div>
+            <div className="h-8 bg-muted rounded-md animate-pulse"></div>
+            <div className="h-8 bg-muted rounded-md animate-pulse"></div>
+          </div>
+        ) : (
+          navItems.map((item) => (
             <Button
               key={item.href}
               variant={pathname === item.href ? "secondary" : "ghost"}
@@ -101,8 +112,8 @@ export default function DashboardSidebar({ userEmail }: DashboardSidebarProps) {
                 {item.label}
               </Link>
             </Button>
-          )
-        })}
+          ))
+        )}
       </nav>
       <div className="p-2 border-t">
         <Button
