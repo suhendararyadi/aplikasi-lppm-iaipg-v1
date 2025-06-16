@@ -8,8 +8,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { type SupabaseClient } from "@supabase/supabase-js";
+import { type Database } from "@/lib/database.types";
 
-async function getProfile(supabase: ReturnType<typeof createClient>) {
+// FIX: Memperbaiki tipe data parameter supabase
+async function getProfile(supabase: SupabaseClient<Database>) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
