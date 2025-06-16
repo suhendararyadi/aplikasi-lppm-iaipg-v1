@@ -15,8 +15,10 @@ import {
   LogOut,
   BookOpenCheck,
   Presentation,
+  UserCog, // Tambahkan ikon baru
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { useEffect, useState } from "react";
 
 interface DashboardSidebarProps {
   userEmail?: string | null;
@@ -25,6 +27,25 @@ interface DashboardSidebarProps {
 export default function DashboardSidebar({ userEmail }: DashboardSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        if (profile) {
+          setUserRole(profile.role);
+        }
+      }
+    };
+    fetchUserRole();
+  }, []);
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -45,6 +66,8 @@ export default function DashboardSidebar({ userEmail }: DashboardSidebarProps) {
     { href: "/dashboard/seminar", label: "Seminar & Workshop", icon: Presentation },
     { href: "/dashboard/laporan", label: "Laporan & Statistik", icon: BarChart3 },
     { href: "/dashboard/pengumuman", label: "Pengumuman", icon: Megaphone },
+    // Tambahkan item menu baru di sini
+    { href: "/dashboard/manajemen-user", label: "Manajemen User", icon: UserCog, adminOnly: true },
     { href: "/dashboard/pengaturan", label: "Pengaturan Akun", icon: Settings },
   ];
 
@@ -61,19 +84,25 @@ export default function DashboardSidebar({ userEmail }: DashboardSidebarProps) {
         )}
       </div>
       <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
-        {navItems.map((item) => (
-          <Button
-            key={item.href}
-            variant={pathname === item.href ? "secondary" : "ghost"}
-            className="w-full justify-start"
-            asChild
-          >
-            <Link href={item.href}>
-              <item.icon className="mr-2 h-4 w-4" />
-              {item.label}
-            </Link>
-          </Button>
-        ))}
+        {navItems.map((item) => {
+          // Hanya tampilkan menu admin jika role adalah LPPM
+          if (item.adminOnly && userRole !== 'LPPM') {
+            return null;
+          }
+          return (
+            <Button
+              key={item.href}
+              variant={pathname === item.href ? "secondary" : "ghost"}
+              className="w-full justify-start"
+              asChild
+            >
+              <Link href={item.href}>
+                <item.icon className="mr-2 h-4 w-4" />
+                {item.label}
+              </Link>
+            </Button>
+          )
+        })}
       </nav>
       <div className="p-2 border-t">
         <Button
