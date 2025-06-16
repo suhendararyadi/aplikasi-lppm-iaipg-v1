@@ -1,4 +1,3 @@
-// components/user-nav.tsx
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,25 +15,33 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from 'react';
 
+// Definisikan tipe yang bersih dan spesifik untuk state user di komponen ini
+interface NavUserState {
+    email?: string;
+    fullName?: string;
+}
+
 export function UserNav() {
   const router = useRouter();
-  const [user, setUser] = useState<{ email?: string; user_metadata: { full_name?: string } } | null>(null);
+  // Gunakan tipe state yang baru dan lebih aman
+  const [user, setUser] = useState<NavUserState | null>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
         const supabase = createClient();
-        const { data } = await supabase.auth.getUser();
-        if (data.user) {
-            // Kita juga perlu data profil untuk nama lengkap
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        
+        if (authUser) {
             const { data: profile } = await supabase
                 .from('profiles')
                 .select('full_name')
-                .eq('id', data.user.id)
+                .eq('id', authUser.id)
                 .single();
             
+            // Set state dengan struktur data yang bersih dan aman
             setUser({ 
-                ...data.user, 
-                user_metadata: { ...data.user.user_metadata, full_name: profile?.full_name }
+                email: authUser.email,
+                fullName: profile?.full_name ?? undefined,
             });
         }
     }
@@ -49,16 +56,19 @@ export function UserNav() {
   };
 
   if (!user) {
-      return null;
+      // Tampilkan placeholder atau loading state saat data user belum ada
+      return (
+        <div className="h-9 w-9 rounded-full bg-muted animate-pulse" />
+      );
   }
 
   const getInitials = (name?: string) => {
     if (!name) return "U";
     const names = name.split(' ');
     if (names.length > 1) {
-      return names[0][0] + names[1][0];
+      return (names[0][0] + names[1][0]).toUpperCase();
     }
-    return name.substring(0, 2);
+    return name.substring(0, 2).toUpperCase();
   }
 
   return (
@@ -66,8 +76,8 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-9 w-9">
-            <AvatarImage src="/avatars/01.png" alt="@shadcn" />
-            <AvatarFallback>{getInitials(user.user_metadata.full_name)}</AvatarFallback>
+            <AvatarImage src="/avatars/01.png" alt="User Avatar" />
+            <AvatarFallback>{getInitials(user.fullName)}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -75,7 +85,7 @@ export function UserNav() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">
-              {user.user_metadata.full_name || "User"}
+              {user.fullName || "User"}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
               {user.email}
