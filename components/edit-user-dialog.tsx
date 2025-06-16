@@ -25,6 +25,7 @@ import { type Database } from "@/lib/database.types";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 type DPLProfile = Pick<Profile, "id" | "full_name">;
+type UserRole = Database["public"]["Enums"]["user_role"];
 
 const initialState = { message: "" };
 
@@ -47,13 +48,18 @@ interface EditUserDialogProps {
 
 export function EditUserDialog({ profile, dplList, open, onOpenChange }: EditUserDialogProps) {
   const [state, formAction] = useActionState(updateUser, initialState);
-  const [selectedRole, setSelectedRole] = useState(profile.role);
+  const [selectedRole, setSelectedRole] = useState<UserRole>(profile.role);
 
   useEffect(() => {
     if (state?.message.includes("berhasil")) {
       onOpenChange(false);
     }
   }, [state, onOpenChange]);
+
+  // FIX: Membuat handler untuk onValueChange agar tipe datanya sesuai
+  const handleRoleChange = (value: string) => {
+    setSelectedRole(value as UserRole);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -89,7 +95,7 @@ export function EditUserDialog({ profile, dplList, open, onOpenChange }: EditUse
               <Label htmlFor="role" className="text-right">
                 Role
               </Label>
-              <Select name="role" defaultValue={profile.role} onValueChange={setSelectedRole}>
+              <Select name="role" defaultValue={profile.role} onValueChange={handleRoleChange}>
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Pilih peran" />
                 </SelectTrigger>
