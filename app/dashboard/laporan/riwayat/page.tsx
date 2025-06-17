@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { type AppPageProps } from "@/lib/types"; // <- Gunakan nama tipe baru
+import { type AppPageProps } from "@/lib/types"; // <- Pastikan impor ini benar
 import {
   Table,
   TableBody,

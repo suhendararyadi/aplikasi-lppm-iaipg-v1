@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
-import { type AppPageProps } from "@/lib/types";
+import { type AppPageProps } from "@/lib/types"; // <- Pastikan impor ini benar
 import {
   Card,
   CardContent,
@@ -52,7 +52,7 @@ const DetailItem = ({
 
 export default async function DetailLaporanPage({
   params,
-}: AppPageProps<{ id: string }>) {
+}: AppPageProps<{ id: string }>) { // <- Pastikan menggunakan AppPageProps
   const supabase = await createClient();
 
   const laporanId = Number(params.id);
