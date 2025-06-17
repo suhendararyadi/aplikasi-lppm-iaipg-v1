@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server";
-import { type AppPageProps } from "@/lib/types";
 import {
   Table,
   TableBody,
@@ -38,9 +37,15 @@ const getStatusVariant = (
   }
 };
 
+// Update the interface to match Next.js 15+ requirements
+interface PageProps {
+  params: Promise<Record<string, string | string[]>>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
 export default async function VerifikasiLaporanPage({
   // searchParams,
-}: AppPageProps) {
+}: PageProps) {
   const supabase = await createClient();
   const {
     data: { user },
