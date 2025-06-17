@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { type Database } from "@/lib/database.types"; // Import tipe Database
+import { type Database } from "@/lib/database.types";
 import {
   Table,
   TableBody,
@@ -25,8 +25,9 @@ import { LaporanTableToolbar } from "@/components/laporan-table-toolbar";
 // Definisikan tipe untuk status laporan dari enum database
 type ReportStatus = Database["public"]["Enums"]["report_status"];
 
-// FIX: Definisikan interface yang lebih robust untuk props halaman
+// FIX: Definisikan interface yang lebih lengkap sesuai standar Next.js Page Props
 interface LaporanPenelitianPageProps {
+  params: { slug: string };
   searchParams: { [key: string]: string | string[] | undefined };
 }
 
@@ -98,7 +99,6 @@ export default async function LaporanPenelitianPage({
     laporanQuery = laporanQuery.ilike('judul_kegiatan', `%${query}%`);
   }
   if (status && status !== 'all') {
-    // FIX: Melakukan casting pada variabel status agar sesuai dengan tipe enum Supabase
     laporanQuery = laporanQuery.eq('status', status as ReportStatus);
   }
   if (dpl && dpl !== 'all') {
