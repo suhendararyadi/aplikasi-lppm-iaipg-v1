@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
-import { type PageProps } from "@/lib/types";
+import { type AppPageProps } from "@/lib/types";
 import {
   Card,
   CardContent,
@@ -52,7 +52,7 @@ const DetailItem = ({
 
 export default async function DetailLaporanPage({
   params,
-}: PageProps<{ id: string }>) {
+}: AppPageProps<{ id: string }>) {
   const supabase = await createClient();
 
   const laporanId = Number(params.id);

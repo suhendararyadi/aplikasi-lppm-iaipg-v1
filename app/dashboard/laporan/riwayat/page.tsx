@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { type AppPageProps } from "@/lib/types"; // <- Gunakan nama tipe baru
 import {
   Table,
   TableBody,
@@ -21,12 +22,6 @@ import { id } from 'date-fns/locale';
 import Link from "next/link";
 import { CircleCheck, FileText } from "lucide-react";
 
-// FIX: Menggunakan Record<string, never> untuk mendefinisikan objek kosong yang aman
-type Props = {
-  params: Record<string, never>;
-  searchParams: { success?: string };
-};
-
 const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (status) {
         case 'Disetujui':
@@ -40,7 +35,7 @@ const getStatusVariant = (status: string): "default" | "secondary" | "destructiv
     }
 }
 
-export default async function RiwayatLaporanPage({ searchParams }: Props) {
+export default async function RiwayatLaporanPage({ searchParams }: AppPageProps) {
   const supabase = await createClient();
   const {
     data: { user },
