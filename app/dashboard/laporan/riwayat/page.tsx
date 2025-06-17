@@ -33,12 +33,15 @@ const getStatusVariant = (status: string): "default" | "secondary" | "destructiv
     }
 }
 
-// FIX: Menggunakan definisi tipe props yang standar untuk Next.js
+// FIX: Menggunakan definisi tipe props yang standar untuk Next.js App Router terbaru
 export default async function RiwayatLaporanPage({ 
   searchParams 
 }: { 
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  // Await searchParams karena sekarang bersifat Promise
+  const resolvedSearchParams = await searchParams;
+  
   const supabase = await createClient();
   const {
     data: { user },
@@ -60,7 +63,7 @@ export default async function RiwayatLaporanPage({
 
   return (
     <div className="space-y-6">
-      {searchParams?.success && (
+      {resolvedSearchParams?.success && (
         <div className="flex items-center gap-4 rounded-lg border border-green-200 bg-green-50 p-4 text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-300">
             <CircleCheck className="h-5 w-5"/>
             <p className="text-sm font-medium">Laporan berhasil dikirim dan sedang menunggu verifikasi dari DPL Anda.</p>
