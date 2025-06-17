@@ -22,14 +22,7 @@ import { BarChart3 } from "lucide-react";
 import { PrintButton } from "@/components/print-button";
 import { LaporanTableToolbar } from "@/components/laporan-table-toolbar";
 
-// Definisikan tipe untuk status laporan dari enum database
 type ReportStatus = Database["public"]["Enums"]["report_status"];
-
-// FIX: Definisikan interface yang lebih lengkap sesuai standar Next.js Page Props
-interface LaporanPenelitianPageProps {
-  params: { slug: string };
-  searchParams: { [key: string]: string | string[] | undefined };
-}
 
 const getStatusVariant = (
   status: string
@@ -46,9 +39,12 @@ const getStatusVariant = (
   }
 };
 
+// FIX: Menggunakan definisi tipe props yang standar untuk Next.js
 export default async function LaporanPenelitianPage({
   searchParams,
-}: LaporanPenelitianPageProps) {
+}: {
+  searchParams?: { [key: string]: string | string[] | undefined };
+}) {
   const supabase = await createClient();
   const {
     data: { user },

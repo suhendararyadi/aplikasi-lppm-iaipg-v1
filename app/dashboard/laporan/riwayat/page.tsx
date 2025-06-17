@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server";
-import { type AppPageProps } from "@/lib/types";
 import {
   Table,
   TableBody,
@@ -34,7 +33,12 @@ const getStatusVariant = (status: string): "default" | "secondary" | "destructiv
     }
 }
 
-export default async function RiwayatLaporanPage({ searchParams }: AppPageProps) {
+// FIX: Menggunakan definisi tipe props yang standar untuk Next.js
+export default async function RiwayatLaporanPage({ 
+  searchParams 
+}: { 
+  searchParams?: { [key: string]: string | string[] | undefined };
+}) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -56,7 +60,7 @@ export default async function RiwayatLaporanPage({ searchParams }: AppPageProps)
 
   return (
     <div className="space-y-6">
-      {searchParams.success && (
+      {searchParams?.success && (
         <div className="flex items-center gap-4 rounded-lg border border-green-200 bg-green-50 p-4 text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-300">
             <CircleCheck className="h-5 w-5"/>
             <p className="text-sm font-medium">Laporan berhasil dikirim dan sedang menunggu verifikasi dari DPL Anda.</p>
