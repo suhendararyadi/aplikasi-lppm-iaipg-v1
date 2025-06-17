@@ -25,10 +25,10 @@ import { LaporanTableToolbar } from "@/components/laporan-table-toolbar";
 // Definisikan tipe untuk status laporan dari enum database
 type ReportStatus = Database["public"]["Enums"]["report_status"];
 
-// FIX: Perbaiki interface agar sesuai dengan tipe props halaman statis
+// FIX: Definisikan interface yang lebih lengkap sesuai standar Next.js Page Props
 interface LaporanPenelitianPageProps {
-  params: {}; // params adalah objek kosong untuk rute statis
-  searchParams?: { [key: string]: string | string[] | undefined };
+  params: { slug: string };
+  searchParams: { [key: string]: string | string[] | undefined };
 }
 
 const getStatusVariant = (
