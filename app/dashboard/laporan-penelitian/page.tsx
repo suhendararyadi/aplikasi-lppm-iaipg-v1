@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { type AppPageProps } from "@/lib/types";
+import { type Database } from "@/lib/database.types"; // Import tipe Database
 import {
   Table,
   TableBody,
@@ -22,6 +22,9 @@ import { BarChart3 } from "lucide-react";
 import { PrintButton } from "@/components/print-button";
 import { LaporanTableToolbar } from "@/components/laporan-table-toolbar";
 
+// Definisikan tipe untuk status laporan dari enum database
+type ReportStatus = Database["public"]["Enums"]["report_status"];
+
 const getStatusVariant = (
   status: string
 ): "default" | "secondary" | "destructive" | "outline" => {
@@ -39,7 +42,9 @@ const getStatusVariant = (
 
 export default async function LaporanPenelitianPage({
   searchParams,
-}: AppPageProps) {
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -90,7 +95,8 @@ export default async function LaporanPenelitianPage({
     laporanQuery = laporanQuery.ilike('judul_kegiatan', `%${query}%`);
   }
   if (status && status !== 'all') {
-    laporanQuery = laporanQuery.eq('status', status);
+    // FIX: Melakukan casting pada variabel status agar sesuai dengan tipe enum Supabase
+    laporanQuery = laporanQuery.eq('status', status as ReportStatus);
   }
   if (dpl && dpl !== 'all') {
     laporanQuery = laporanQuery.eq('dpl_id', dpl);
