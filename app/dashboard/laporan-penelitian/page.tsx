@@ -39,12 +39,15 @@ const getStatusVariant = (
   }
 };
 
-// FIX: Menggunakan definisi tipe props yang standar untuk Next.js
+// FIX: Menggunakan definisi tipe props yang standar untuk Next.js App Router terbaru
 export default async function LaporanPenelitianPage({
   searchParams,
 }: {
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  // Await searchParams karena sekarang bersifat Promise
+  const resolvedSearchParams = await searchParams;
+  
   const supabase = await createClient();
   const {
     data: { user },
@@ -73,9 +76,10 @@ export default async function LaporanPenelitianPage({
     );
   }
 
-  const query = searchParams?.q?.toString();
-  const status = searchParams?.status?.toString();
-  const dpl = searchParams?.dpl?.toString();
+  // Gunakan resolvedSearchParams alih-alih searchParams
+  const query = resolvedSearchParams?.q?.toString();
+  const status = resolvedSearchParams?.status?.toString();
+  const dpl = resolvedSearchParams?.dpl?.toString();
 
   let laporanQuery = supabase
     .from("laporan")
@@ -104,7 +108,6 @@ export default async function LaporanPenelitianPage({
   const { data: laporan, error } = await laporanQuery;
 
   const { data: dplList } = await supabase.from('profiles').select('id, full_name').eq('role', 'DPL');
-
 
   if (error) {
     return <p>Gagal memuat daftar laporan: {error.message}</p>;
