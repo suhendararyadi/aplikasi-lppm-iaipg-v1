@@ -21,8 +21,9 @@ import { id } from 'date-fns/locale';
 import Link from "next/link";
 import { CircleCheck, FileText } from "lucide-react";
 
+// FIX: Menggunakan Record<string, never> untuk mendefinisikan objek kosong yang aman
 type Props = {
-  params: {};
+  params: Record<string, never>;
   searchParams: { success?: string };
 };
 
