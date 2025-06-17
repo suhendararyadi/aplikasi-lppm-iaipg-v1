@@ -14,12 +14,6 @@ import { id } from "date-fns/locale";
 import Link from "next/link";
 import { Download, MessageSquareQuote, ChevronLeft } from "lucide-react";
 
-// FIX: Mendefinisikan tipe Props secara terpisah dan lebih lengkap
-type DetailPageProps = {
-  params: { id: string };
-  searchParams?: { [key: string]: string | string[] | undefined };
-};
-
 const getStatusVariant = (
   status: string
 ): "default" | "secondary" | "destructive" | "outline" => {
@@ -55,9 +49,13 @@ const DetailItem = ({
   );
 };
 
+// FIX: Mendefinisikan tipe props secara inline dan lengkap untuk mengatasi error build Vercel
 export default async function DetailLaporanPage({
   params,
-}: DetailPageProps) { // Menggunakan tipe Props yang sudah didefinisikan
+}: {
+  params: { id: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
   const supabase = await createClient();
 
   const laporanId = Number(params.id);
