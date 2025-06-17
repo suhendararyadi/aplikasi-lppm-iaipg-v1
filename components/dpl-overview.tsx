@@ -13,12 +13,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-// import { Badge } from "@/components/ui/badge";
 import { Users, FileClock, FileCheck2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "./ui/button";
+import { ClientFormattedDate } from "./client-formatted-date";
 
-export function DplOverview() {
+interface DplOverviewProps {
+  stats: {
+    totalMahasiswa: number;
+    pendingReports: number;
+    approvedReports: number;
+  };
+  recentReports: {
+    id: number;
+    judul_kegiatan: string;
+    tanggal_kegiatan: string;
+    mahasiswa: { full_name: string | null } | null;
+  }[];
+}
+
+export function DplOverview({ stats, recentReports }: DplOverviewProps) {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -30,7 +44,7 @@ export function DplOverview() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">15</div>
+            <div className="text-2xl font-bold">{stats.totalMahasiswa}</div>
             <p className="text-xs text-muted-foreground">Total mahasiswa</p>
           </CardContent>
         </Card>
@@ -42,7 +56,7 @@ export function DplOverview() {
             <FileClock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">8</div>
+            <div className="text-2xl font-bold">{stats.pendingReports}</div>
              <p className="text-xs text-muted-foreground">Laporan baru masuk</p>
           </CardContent>
         </Card>
@@ -52,7 +66,7 @@ export function DplOverview() {
             <FileCheck2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">42</div>
+            <div className="text-2xl font-bold">{stats.approvedReports}</div>
              <p className="text-xs text-muted-foreground">Total laporan selesai</p>
           </CardContent>
         </Card>
@@ -70,31 +84,25 @@ export function DplOverview() {
               <TableRow>
                 <TableHead>Mahasiswa</TableHead>
                 <TableHead>Judul Laporan</TableHead>
-                <TableHead>Tanggal Pengajuan</TableHead>
+                <TableHead>Tanggal Kegiatan</TableHead>
                 <TableHead className="text-right">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow>
-                <TableCell className="font-medium">Ahmad Subarjo</TableCell>
-                <TableCell>Penelitian Partisipatif Desa Cikajang</TableCell>
-                <TableCell>16 Juni 2025</TableCell>
-                <TableCell className="text-right">
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href="#">Verifikasi</Link>
-                  </Button>
-                </TableCell>
-              </TableRow>
-               <TableRow>
-                <TableCell className="font-medium">Dewi Lestari</TableCell>
-                <TableCell>Pemberdayaan UMKM Melalui Pelatihan Digital</TableCell>
-                <TableCell>15 Juni 2025</TableCell>
-                <TableCell className="text-right">
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href="#">Verifikasi</Link>
-                  </Button>
-                </TableCell>
-              </TableRow>
+              {recentReports.map(report => (
+                <TableRow key={report.id}>
+                  <TableCell className="font-medium">{report.mahasiswa?.full_name || 'N/A'}</TableCell>
+                  <TableCell>{report.judul_kegiatan}</TableCell>
+                  <TableCell>
+                    <ClientFormattedDate dateString={report.tanggal_kegiatan} />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/dashboard/laporan/detail/${report.id}`}>Verifikasi</Link>
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </CardContent>

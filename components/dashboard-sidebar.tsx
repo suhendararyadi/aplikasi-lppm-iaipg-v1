@@ -1,4 +1,3 @@
-// components/dashboard-sidebar.tsx
 "use client";
 
 import Link from "next/link";
@@ -17,14 +16,12 @@ import {
   BarChart3
 } from "lucide-react";
 
-// Definisikan tipe untuk item navigasi
 interface NavItem {
   href: string;
   label: string;
   icon: React.ElementType;
 }
 
-// Konfigurasi menu berdasarkan peran pengguna
 const navConfig: Record<string, NavItem[]> = {
   LPPM: [
     { href: "/dashboard", label: "Overview", icon: Home },

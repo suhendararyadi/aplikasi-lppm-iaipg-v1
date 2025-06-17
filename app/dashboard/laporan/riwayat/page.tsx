@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { type AppPageProps } from "@/lib/types"; // <- Pastikan impor ini benar
+import { type AppPageProps } from "@/lib/types";
 import {
   Table,
   TableBody,
@@ -17,10 +17,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
-import { id } from 'date-fns/locale';
 import Link from "next/link";
 import { CircleCheck, FileText } from "lucide-react";
+import { ClientFormattedDate } from "@/components/client-formatted-date";
 
 const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (status) {
@@ -89,7 +88,7 @@ export default async function RiwayatLaporanPage({ searchParams }: AppPageProps)
                       {item.judul_kegiatan}
                     </TableCell>
                     <TableCell>
-                      {format(new Date(item.tanggal_kegiatan), "dd MMMM yyyy", { locale: id })}
+                      <ClientFormattedDate dateString={item.tanggal_kegiatan} />
                     </TableCell>
                     <TableCell>
                       <Badge 

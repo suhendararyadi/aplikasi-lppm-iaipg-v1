@@ -21,14 +21,11 @@ export default async function DashboardLayout({
     redirect("/auth/login");
   }
 
-  // Variabel 'profile' yang tidak terpakai telah dihapus dari sini
-
   return (
-    <div className="flex min-h-screen w-full bg-muted/40">
+    <div className="flex min-h-screen w-full bg-muted/40 print:bg-white">
       <DashboardSidebar userEmail={user.email} />
-      <div className="flex flex-1 flex-col sm:gap-4 sm:py-4 sm:pl-14">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-          {/* Header content bisa ditambahkan di sini, seperti breadcrumbs */}
+      <div className="flex flex-1 flex-col sm:gap-4 sm:py-4 sm:pl-14 print:p-0 print:gap-0">
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 print:hidden">
           <div className="relative ml-auto flex-1 md:grow-0">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
@@ -39,7 +36,7 @@ export default async function DashboardLayout({
           </div>
           <UserNav />
         </header>
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 print:p-0 print:overflow-visible">
           {children}
         </main>
       </div>
