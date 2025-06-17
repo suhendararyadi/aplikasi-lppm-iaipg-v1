@@ -14,11 +14,7 @@ import { id } from "date-fns/locale";
 import Link from "next/link";
 import { Download, MessageSquareQuote, ChevronLeft } from "lucide-react";
 
-type Props = {
-  params: { id: string };
-  searchParams: { [key: string]: string | string[] | undefined };
-};
-
+// Helper untuk Badge Status
 const getStatusVariant = (
   status: string
 ): "default" | "secondary" | "destructive" | "outline" => {
@@ -34,6 +30,7 @@ const getStatusVariant = (
   }
 };
 
+// Komponen untuk menampilkan setiap baris detail
 const DetailItem = ({
   label,
   value,
@@ -54,8 +51,20 @@ const DetailItem = ({
   );
 };
 
-export default async function DetailLaporanPage({ params }: Props) {
+// FIX: Mendefinisikan tipe props secara inline untuk menghindari konflik
+export default async function DetailLaporanPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const supabase = await createClient();
+
+  const laporanId = Number(params.id);
+
+  // Tambahkan pengecekan jika ID tidak valid setelah konversi
+  if (isNaN(laporanId)) {
+    notFound();
+  }
 
   const { data: laporan, error } = await supabase
     .from("laporan")
@@ -66,7 +75,7 @@ export default async function DetailLaporanPage({ params }: Props) {
       dpl:profiles!laporan_dpl_id_fkey(full_name)
     `
     )
-    .eq("id", params.id)
+    .eq("id", laporanId) // Gunakan ID yang sudah dikonversi ke number
     .single();
 
   if (error || !laporan) {
