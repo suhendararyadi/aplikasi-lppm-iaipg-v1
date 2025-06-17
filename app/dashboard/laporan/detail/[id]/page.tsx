@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
+import { type PageProps } from "@/lib/types";
 import {
   Card,
   CardContent,
@@ -49,17 +50,9 @@ const DetailItem = ({
   );
 };
 
-// Ubah definisi props seperti ini
-type PageProps = {
-  params: {
-    id: string;
-  };
-};
-
-// Kemudian gunakan type tersebut pada component
 export default async function DetailLaporanPage({
   params,
-}: PageProps) {
+}: PageProps<{ id: string }>) {
   const supabase = await createClient();
 
   const laporanId = Number(params.id);
@@ -86,20 +79,15 @@ export default async function DetailLaporanPage({
 
   return (
     <div className="space-y-6">
-      <Link
-        href="/dashboard/laporan/riwayat"
-        className="flex items-center text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ChevronLeft className="mr-1 h-4 w-4" /> Kembali ke Riwayat
-      </Link>
+       <Link href="/dashboard/laporan/riwayat" className="flex items-center text-sm text-muted-foreground hover:text-foreground">
+           <ChevronLeft className="mr-1 h-4 w-4" /> Kembali ke Riwayat
+       </Link>
 
       <Card>
         <CardHeader>
           <div className="flex justify-between items-start">
             <div>
-              <CardTitle className="text-2xl mb-1">
-                {laporan.judul_kegiatan}
-              </CardTitle>
+              <CardTitle className="text-2xl mb-1">{laporan.judul_kegiatan}</CardTitle>
               <CardDescription>
                 Diajukan oleh: {laporan.mahasiswa?.full_name || "N/A"}
               </CardDescription>
@@ -118,13 +106,9 @@ export default async function DetailLaporanPage({
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <DetailItem
               label="Tanggal Kegiatan"
-              value={format(
-                new Date(laporan.tanggal_kegiatan),
-                "dd MMMM yyyy",
-                {
-                  locale: id,
-                }
-              )}
+              value={format(new Date(laporan.tanggal_kegiatan), "dd MMMM yyyy", {
+                locale: id,
+              })}
             />
             <DetailItem
               label="Bidang Penelitian"
@@ -134,7 +118,7 @@ export default async function DetailLaporanPage({
               label="Tempat Pelaksanaan"
               value={laporan.tempat_pelaksanaan}
             />
-            <DetailItem label="Narasumber" value={laporan.narasumber} />
+             <DetailItem label="Narasumber" value={laporan.narasumber} />
             <DetailItem
               label="Mahasiswa Terlibat"
               value={laporan.mahasiswa_terlibat}
@@ -146,39 +130,27 @@ export default async function DetailLaporanPage({
           </div>
 
           <div className="space-y-6 pt-6 border-t">
-            <DetailItem
-              label="Deskripsi Kegiatan"
-              value={laporan.deskripsi_kegiatan}
-            />
-            <DetailItem
-              label="Rencana Tindak Lanjut"
-              value={laporan.rencana_tindak_lanjut}
-            />
+             <DetailItem label="Deskripsi Kegiatan" value={laporan.deskripsi_kegiatan} />
+             <DetailItem label="Rencana Tindak Lanjut" value={laporan.rencana_tindak_lanjut} />
           </div>
 
           {laporan.feedback_dpl && (
-            <div className="rounded-lg border bg-muted/50 p-4 space-y-2">
-              <h3 className="text-sm font-semibold flex items-center gap-2">
-                <MessageSquareQuote className="h-4 w-4 text-muted-foreground" />
-                Catatan / Feedback dari DPL
-              </h3>
-              <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                {laporan.feedback_dpl}
-              </p>
+             <div className="rounded-lg border bg-muted/50 p-4 space-y-2">
+                <h3 className="text-sm font-semibold flex items-center gap-2">
+                    <MessageSquareQuote className="h-4 w-4 text-muted-foreground" />
+                    Catatan / Feedback dari DPL
+                </h3>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{laporan.feedback_dpl}</p>
             </div>
           )}
 
           {laporan.dokumen_pendukung_url && (
             <div className="pt-6 border-t">
-              <Button asChild>
-                <a
-                  href={laporan.dokumen_pendukung_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Download className="mr-2 h-4 w-4" /> Unduh Dokumen Pendukung
-                </a>
-              </Button>
+                 <Button asChild>
+                    <a href={laporan.dokumen_pendukung_url} target="_blank" rel="noopener noreferrer">
+                        <Download className="mr-2 h-4 w-4" /> Unduh Dokumen Pendukung
+                    </a>
+                </Button>
             </div>
           )}
         </CardContent>
