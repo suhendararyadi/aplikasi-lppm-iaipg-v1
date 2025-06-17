@@ -14,7 +14,11 @@ import { id } from "date-fns/locale";
 import Link from "next/link";
 import { Download, MessageSquareQuote, ChevronLeft } from "lucide-react";
 
-// Helper untuk Badge Status
+type Props = {
+  params: { id: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+};
+
 const getStatusVariant = (
   status: string
 ): "default" | "secondary" | "destructive" | "outline" => {
@@ -30,7 +34,6 @@ const getStatusVariant = (
   }
 };
 
-// Komponen untuk menampilkan setiap baris detail
 const DetailItem = ({
   label,
   value,
@@ -51,11 +54,7 @@ const DetailItem = ({
   );
 };
 
-export default async function DetailLaporanPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function DetailLaporanPage({ params }: Props) {
   const supabase = await createClient();
 
   const { data: laporan, error } = await supabase
@@ -73,9 +72,6 @@ export default async function DetailLaporanPage({
   if (error || !laporan) {
     notFound();
   }
-
-  // Cek otorisasi, pastikan user yang login berhak melihat laporan ini
-  // (Logic ini bisa diperketat sesuai kebutuhan)
 
   return (
     <div className="space-y-6">
@@ -155,9 +151,6 @@ export default async function DetailLaporanPage({
           )}
         </CardContent>
       </Card>
-      
-      {/* Nanti di sini kita akan tambahkan area untuk Aksi DPL (Setujui/Revisi) */}
-
     </div>
   );
 }

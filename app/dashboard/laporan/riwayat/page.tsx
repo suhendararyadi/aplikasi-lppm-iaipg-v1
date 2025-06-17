@@ -21,11 +21,15 @@ import { id } from 'date-fns/locale';
 import Link from "next/link";
 import { CircleCheck, FileText } from "lucide-react";
 
-// Helper untuk Badge Status
+type Props = {
+  params: {};
+  searchParams: { success?: string };
+};
+
 const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (status) {
         case 'Disetujui':
-            return 'default'; // Akan berwarna hijau karena kita akan modifikasi
+            return 'default';
         case 'Revisi':
             return 'destructive';
         case 'Menunggu Verifikasi':
@@ -35,18 +39,13 @@ const getStatusVariant = (status: string): "default" | "secondary" | "destructiv
     }
 }
 
-export default async function RiwayatLaporanPage({
-  searchParams,
-}: {
-  searchParams: { success?: string };
-}) {
+export default async function RiwayatLaporanPage({ searchParams }: Props) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    // Seharusnya tidak terjadi karena layout sudah melindungi, tapi sebagai pengaman
     return <p>Silakan login untuk melihat riwayat.</p>;
   }
 
