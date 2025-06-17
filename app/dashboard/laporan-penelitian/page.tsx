@@ -17,10 +17,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
-import { id } from "date-fns/locale";
 import Link from "next/link";
-import { BarChart3, FileWarning } from "lucide-react";
+import { BarChart3 } from "lucide-react";
 import { PrintButton } from "@/components/print-button";
 import { LaporanTableToolbar } from "@/components/laporan-table-toolbar";
 
@@ -100,7 +98,6 @@ export default async function LaporanPenelitianPage({
 
   const { data: laporan, error } = await laporanQuery;
 
-  // Ambil daftar DPL untuk filter
   const { data: dplList } = await supabase.from('profiles').select('id, full_name').eq('role', 'DPL');
 
 

@@ -5,13 +5,15 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+type ActionState = { message: string | null };
+
 const VerifikasiSchema = z.object({
   laporanId: z.string().min(1),
   feedback: z.string().optional(),
   action: z.enum(["setujui", "revisi"]),
 });
 
-export async function processDplAction(prevState: any, formData: FormData) {
+export async function processDplAction(prevState: ActionState, formData: FormData) {
   const validatedFields = VerifikasiSchema.safeParse(
     Object.fromEntries(formData.entries())
   );
@@ -35,7 +37,6 @@ export async function processDplAction(prevState: any, formData: FormData) {
     return { message: "Otentikasi gagal." };
   }
   
-  // Ambil peran pengguna saat ini
   const { data: profile } = await supabase
     .from('profiles')
     .select('role')
@@ -48,7 +49,6 @@ export async function processDplAction(prevState: any, formData: FormData) {
 
   const newStatus = action === "setujui" ? "Disetujui" : "Revisi";
   
-  // Buat query dasar
   let query = supabase
     .from("laporan")
     .update({
@@ -57,15 +57,11 @@ export async function processDplAction(prevState: any, formData: FormData) {
     })
     .eq("id", Number(laporanId));
 
-  // Tambahkan filter keamanan berdasarkan peran
   if (profile.role === 'DPL') {
-    // Jika DPL, pastikan dia hanya bisa update laporan dari mahasiswanya
     query = query.eq("dpl_id", user.id);
   } else if (profile.role !== 'LPPM') {
-    // Jika bukan DPL atau LPPM, tolak aksi
     return { message: "Anda tidak memiliki izin untuk melakukan aksi ini." };
   }
-  // Jika LPPM, tidak perlu filter tambahan, RLS sudah mengizinkan
 
   const { error } = await query;
 
@@ -74,8 +70,6 @@ export async function processDplAction(prevState: any, formData: FormData) {
   }
 
   revalidatePath(`/dashboard/laporan/detail/${laporanId}`);
-  // LPPM mungkin lebih baik diarahkan ke halaman daftar laporan LPPM,
-  // tapi untuk saat ini kita arahkan ke halaman verifikasi DPL
   revalidatePath(`/dashboard/verifikasi-laporan`);
   redirect(`/dashboard/verifikasi-laporan`);
 }

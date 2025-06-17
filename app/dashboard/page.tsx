@@ -11,16 +11,10 @@ import {
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
-// Definisikan tipe data yang lebih spesifik untuk setiap peran
 type LppmStats = { totalUsers: number; totalDpl: number; totalMahasiswa: number; pendingReports: number; };
 type DplStats = { totalMahasiswa: number; pendingReports: number; approvedReports: number; };
 type MahasiswaStats = { totalLaporan: number; approvedReports: number; pendingReports: number; };
 
-type RecentActivity = { id: number; judul_kegiatan: string; mahasiswa: { full_name: string | null } | null; };
-type RecentReport = { id: number; judul_kegiatan: string; status: string; tanggal_kegiatan?: string; mahasiswa?: { full_name: string | null } | null; };
-type ChartData = { name: string, total: number };
-
-// Komponen async terpisah untuk mengambil dan menampilkan data
 async function DashboardData() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

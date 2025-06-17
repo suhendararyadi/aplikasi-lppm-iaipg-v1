@@ -13,17 +13,12 @@ export function ClientFormattedDate({ dateString, formatString = "dd MMMM yyyy" 
   const [formattedDate, setFormattedDate] = useState('');
 
   useEffect(() => {
-    // Efek ini hanya berjalan di sisi klien setelah proses render awal,
-    // sehingga menghindari perbedaan antara server dan browser.
     try {
       setFormattedDate(format(new Date(dateString), formatString, { locale: id }));
-    } catch (error) {
-        // Jika tanggal tidak valid, tampilkan string aslinya
+    } catch {
         setFormattedDate(dateString);
     }
   }, [dateString, formatString]);
   
-  // Tampilkan string tanggal asli sebagai placeholder saat render di server
-  // atau saat efek belum berjalan.
   return <>{formattedDate || dateString}</>;
 }
