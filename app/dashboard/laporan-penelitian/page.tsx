@@ -25,6 +25,11 @@ import { LaporanTableToolbar } from "@/components/laporan-table-toolbar";
 // Definisikan tipe untuk status laporan dari enum database
 type ReportStatus = Database["public"]["Enums"]["report_status"];
 
+// FIX: Definisikan interface yang lebih robust untuk props halaman
+interface LaporanPenelitianPageProps {
+  searchParams: { [key: string]: string | string[] | undefined };
+}
+
 const getStatusVariant = (
   status: string
 ): "default" | "secondary" | "destructive" | "outline" => {
@@ -42,9 +47,7 @@ const getStatusVariant = (
 
 export default async function LaporanPenelitianPage({
   searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) {
+}: LaporanPenelitianPageProps) {
   const supabase = await createClient();
   const {
     data: { user },
