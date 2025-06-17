@@ -62,17 +62,32 @@ const DetailItem = ({
 export default function DetailLaporanPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const [laporan, setLaporan] = useState<LaporanDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [isDplForThisReport, setIsDplForThisReport] = useState(false);
   const [currentUserRole, setCurrentUserRole] = useState<string|null>(null);
+  const [resolvedParams, setResolvedParams] = useState<{ id: string } | null>(null);
+
+  // Resolve params first
+  useEffect(() => {
+    async function resolveParams() {
+      const resolved = await params;
+      setResolvedParams(resolved);
+    }
+    resolveParams();
+  }, [params]);
 
   useEffect(() => {
+    if (!resolvedParams) return;
+
     const supabase = createClient();
     async function fetchData() {
-      const laporanId = Number(params.id);
+      // Additional null check to satisfy TypeScript
+      if (!resolvedParams) return;
+      
+      const laporanId = Number(resolvedParams.id);
       if (isNaN(laporanId)) {
         notFound();
         return;
@@ -103,9 +118,9 @@ export default function DetailLaporanPage({
       setLoading(false);
     }
     fetchData();
-  }, [params.id]);
+  }, [resolvedParams]);
 
-  if (loading) {
+  if (loading || !resolvedParams) {
     return (
       <div className="flex justify-center items-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
