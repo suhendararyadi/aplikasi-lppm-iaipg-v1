@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ThumbsUp, MessageSquareReply } from "lucide-react";
 
-const initialState = { message: null };
+// Fix the initial state type
+const initialState = { message: "" };
 
 function SubmitButtons() {
   const { pending } = useFormStatus();
