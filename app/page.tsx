@@ -8,7 +8,7 @@ import {
   BarChart3,
   BookCopy,
 } from "lucide-react";
-import { ThemeSwitcher } from "@/components/theme-switcher";
+import ThemeSwitcher from "@/components/theme-switcher";
 
 // Komponen Header
 const LandingHeader = () => (
