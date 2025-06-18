@@ -8,8 +8,7 @@ import {
   BarChart3,
   BookCopy,
 } from "lucide-react";
-// FIX: Mengubah import menjadi default import sesuai saran error
-import ThemeSwitcher from "@/components/theme-switcher";
+// import ThemeSwitcher from "@/components/theme-switcher"; // Dihapus sementara
 
 // Komponen Header
 const LandingHeader = () => (
@@ -23,7 +22,7 @@ const LandingHeader = () => (
           </span>
         </div>
         <div className="flex items-center space-x-2">
-           <ThemeSwitcher />
+           {/* <ThemeSwitcher /> */} {/* Dihapus sementara */}
            <Button asChild>
             <Link href="/auth/login">
               <LogIn className="mr-2 h-4 w-4" /> Login
