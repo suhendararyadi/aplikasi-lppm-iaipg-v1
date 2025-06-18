@@ -15,6 +15,22 @@ type LppmStats = { totalUsers: number; totalDpl: number; totalMahasiswa: number;
 type DplStats = { totalMahasiswa: number; pendingReports: number; approvedReports: number; };
 type MahasiswaStats = { totalLaporan: number; approvedReports: number; pendingReports: number; };
 
+// Define types for chart data and activities
+type ChartDataItem = Record<string, any>; // More specific type for chart data items
+type ChartData = ChartDataItem[];
+type RecentActivity = {
+  id: string;
+  judul_kegiatan: string;
+  mahasiswa: { full_name: string } | null;
+};
+type RecentReport = {
+  id: string;
+  judul_kegiatan: string;
+  status?: string;
+  tanggal_kegiatan?: string;
+  mahasiswa?: { full_name: string } | null;
+};
+
 async function DashboardData() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -43,11 +59,14 @@ async function DashboardData() {
   }
 
   const role = profile.role;
-  let stats, chartData, recentActivities, recentReports;
+  let stats: LppmStats | DplStats | MahasiswaStats | undefined;
+  let chartData: ChartData | undefined;
+  let recentActivities: RecentActivity[] | undefined;
+  let recentReports: RecentReport[] | undefined;
 
   if (role === "LPPM") {
     const { data: chartResult } = await supabase.rpc('get_report_stats_by_field');
-    chartData = chartResult || [];
+    chartData = (chartResult as ChartDataItem[]) || [];
 
     const [{ count: totalUsers }, { count: totalDpl }, { count: totalMahasiswa }, { count: pendingReports }, { data: activities }] = await Promise.all([
       supabase.from("profiles").select("*", { count: "exact", head: true }),
@@ -57,7 +76,7 @@ async function DashboardData() {
       supabase.from("laporan").select("id, judul_kegiatan, mahasiswa:profiles!laporan_mahasiswa_id_fkey(full_name)").order("created_at", { ascending: false }).limit(5)
     ]);
     stats = { totalUsers: totalUsers ?? 0, totalDpl: totalDpl ?? 0, totalMahasiswa: totalMahasiswa ?? 0, pendingReports: pendingReports ?? 0 };
-    recentActivities = activities || [];
+    recentActivities = (activities as RecentActivity[]) || [];
   } else if (role === "DPL") {
     const [{ count: totalMahasiswa }, { count: pendingReports }, { count: approvedReports }, { data: reports }] = await Promise.all([
       supabase.from("profiles").select("*", { count: "exact", head: true }).eq("dpl_id", user.id),
@@ -66,7 +85,7 @@ async function DashboardData() {
       supabase.from("laporan").select("id, judul_kegiatan, tanggal_kegiatan, mahasiswa:profiles!laporan_mahasiswa_id_fkey(full_name)").eq("dpl_id", user.id).eq("status", "Menunggu Verifikasi").order("created_at", { ascending: false }).limit(5)
     ]);
     stats = { totalMahasiswa: totalMahasiswa ?? 0, pendingReports: pendingReports ?? 0, approvedReports: approvedReports ?? 0 };
-    recentReports = reports || [];
+    recentReports = (reports as RecentReport[]) || [];
   } else { // Mahasiswa
     const [{ count: totalLaporan }, { count: approvedReports }, { count: pendingReports }, { data: reports }] = await Promise.all([
         supabase.from("laporan").select("*", { count: "exact", head: true }).eq("mahasiswa_id", user.id),
@@ -75,7 +94,7 @@ async function DashboardData() {
         supabase.from("laporan").select("id, judul_kegiatan, status").eq("mahasiswa_id", user.id).order("created_at", { ascending: false }).limit(5)
     ]);
     stats = { totalLaporan: totalLaporan ?? 0, approvedReports: approvedReports ?? 0, pendingReports: pendingReports ?? 0 };
-    recentReports = reports || [];
+    recentReports = (reports as RecentReport[]) || [];
   }
 
   const renderOverview = () => {
