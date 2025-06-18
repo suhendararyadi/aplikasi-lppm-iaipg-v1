@@ -8,6 +8,7 @@ import {
   BarChart3,
   BookCopy,
 } from "lucide-react";
+// FIX: Mengubah import menjadi default import sesuai saran error
 import ThemeSwitcher from "@/components/theme-switcher";
 
 // Komponen Header
